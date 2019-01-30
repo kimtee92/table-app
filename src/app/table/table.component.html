@@ -1,0 +1,48 @@
+<form [formGroup]="registerForm" (ngSubmit)="onAddRow()">
+    <mat-form-field>
+      <input matInput placeholder="Name" formControlName="Name">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput placeholder="Number" formControlName="Number">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput placeholder="Address" formControlName="Address">
+    </mat-form-field>
+    <button type="submit" mat-raised-button class="add-column-button" color="primary">Register</button>
+    <button mat-raised-button color="primary" (click)="ExportTOExcel()">Export as Excel</button>
+  </form>
+
+<div class="example-container mat-elevation-z8 " #TABLE>
+  <table mat-table #table [dataSource]="dataSource">
+
+    <!--- Note that these columns can be defined in any order.
+          The actual rendered columns are set as a property on the row definition" -->
+
+    <!-- Position Column -->
+    <ng-container matColumnDef="Name">
+      <th mat-header-cell *matHeaderCellDef> Name </th>
+      <td mat-cell *matCellDef="let data"> {{data.Name}} </td>
+    </ng-container>
+
+    <!-- Name Column -->
+    <ng-container matColumnDef="Number">
+      <th mat-header-cell *matHeaderCellDef> Number </th>
+      <td mat-cell *matCellDef="let data"> {{data.Number}} </td>
+    </ng-container>
+
+    <!-- Weight Column -->
+    <ng-container matColumnDef="Address">
+      <th mat-header-cell *matHeaderCellDef> Address </th>
+      <td mat-cell *matCellDef="let data"> {{data.Address}} </td>
+    </ng-container>
+
+    <!-- Symbol Column -->
+    <ng-container matColumnDef="Date">
+      <th mat-header-cell *matHeaderCellDef> Date </th>
+      <td mat-cell *matCellDef="let data"> {{data.Date}} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnsToDisplay;"></tr>
+  </table>
+</div>

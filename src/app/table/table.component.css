@@ -1,0 +1,9 @@
+.mat-form-field, .mat-raised-button {
+    margin-right: 10px;
+}
+.example-container {
+    display: flex;
+    flex-direction: column;
+    min-width: 300px;
+    overflow: auto;
+}
