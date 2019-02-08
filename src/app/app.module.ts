@@ -5,7 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { TableModule } from './table/table.Module';
+import { TableModule } from './table/table.module';
 import { SharedModule } from './shared/shared.module';
 
 @NgModule({
