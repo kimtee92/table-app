@@ -1,19 +1,12 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import {MatTableDataSource} from '@angular/material';
+import { MatTableDataSource} from '@angular/material';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Guest } from '../shared/model/guest';
+import { Event } from '../shared/model/event';
+import { first } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
+import { SocketService } from '../shared/services/socket.service';
 import * as XLSX from 'xlsx';
-
-export interface Guest {
-  Name: string;
-  Number: string;
-  Address: string;
-  Date: string;
-}
-
-const KIM_DATA: Guest[] = [
-  {Name: 'Kim Lester Tee', Number: ' 0412919397 ', Address: 'Glebe', Date: '30/01/2019'}
-];
 
 @Component({
   selector: 'app-table',
@@ -23,22 +16,53 @@ const KIM_DATA: Guest[] = [
 
 export class TableComponent implements OnInit {
   @ViewChild('TABLE') table: ElementRef;
+  ioConnection: any;
   registerForm: FormGroup;
-  displayedColumns: string[] = ['Name', 'Number', 'Address', 'Date'];
+  guestData: Guest[] = [];
+  displayedColumns: string[] = ['Name', 'Email', 'Address', 'Date'];
   columnsToDisplay: string[] = this.displayedColumns.slice();
-  dataSource = new MatTableDataSource(KIM_DATA);
+  dataSource = new MatTableDataSource();
   date = new Date();
 
   constructor(private formBuilder: FormBuilder,
-              private datePipe: DatePipe) {}
+              private datePipe: DatePipe,
+              private socketService: SocketService) {}
 
   ngOnInit() {
     this.registerForm = this.formBuilder.group({
       Name: ['', Validators.required],
-      Number: ['', Validators.required],
+      Email: ['', Validators.required],
       Address: ['', Validators.required],
       Date: ['']
     });
+    this.socketService.getAll().pipe(first()).subscribe((tableData: Guest[]) => {
+      this.guestData = tableData;
+      this.dataSource = new MatTableDataSource(this.guestData);
+    });
+    this.initIoConnection();
+  }
+
+  // convenience getter for easy access to form fields
+  get f() { return this.registerForm.controls; }
+
+  private initIoConnection(): void {
+    this.socketService.initSocket();
+
+    this.ioConnection = this.socketService.onRegister()
+      .subscribe((guest: Guest) => {
+        this.guestData.push(guest);
+        this.dataSource = new MatTableDataSource(this.guestData);
+      });
+
+    this.socketService.onEvent(Event.CONNECT)
+      .subscribe(() => {
+        console.log('connected');
+      });
+
+    this.socketService.onEvent(Event.DISCONNECT)
+      .subscribe(() => {
+        console.log('disconnected');
+      });
   }
 
   onAddRow() {
@@ -47,10 +71,8 @@ export class TableComponent implements OnInit {
       return;
     }
     this.registerForm.value.Date = this.datePipe.transform(this.date, 'dd/MM/yyyy');
-    this.registerForm.value.Number = this.registerForm.value.Number;
-    KIM_DATA.push(this.registerForm.value);
+    this.socketService.register(this.registerForm.value);
     this.registerForm.reset();
-    this.dataSource = new MatTableDataSource(KIM_DATA);
   }
 
   ExportTOExcel() {

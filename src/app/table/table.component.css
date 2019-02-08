@@ -7,3 +7,7 @@
     min-width: 300px;
     overflow: auto;
 }
+.mat-table {
+    table-layout: auto !important;
+    width: 100% !important; 
+}
